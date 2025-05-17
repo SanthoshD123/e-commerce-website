@@ -1,4 +1,4 @@
-name: Deno
+name: Node.js CI
 
 on:
   push:
@@ -6,24 +6,27 @@ on:
   pull_request:
     branches: ["main"]
 
-permissions:
-  contents: read
-
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Setup repo
-        uses: actions/checkout@v4
+    strategy:
+      matrix:
+        node-version: [18.x]
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          deno-version: v1.x
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Run linter
-        run: deno lint
+        run: npm run lint
 
       - name: Run tests
-        run: deno test -A
+        run: npm test
